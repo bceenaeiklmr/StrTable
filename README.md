@@ -1,10 +1,11 @@
 # StrTable
 
-StrTable is a powerful and highly configurable ASCII table generator for AutoHotkey v2. It allows you to format tabular data from strings, arrays, or clipboard contents with customizable headers, borders, alignments, and padding.
+StrTable is a powerful and highly configurable ASCII table generator for AutoHotkey v2. It allows you to format tabular data from strings, text files, arrays, or clipboard contents with customizable headers, borders, alignments, and padding.
 
 ## Features
-✓ Supports string (CSV-like), array, and clipboard input  
+✓ Supports string (CSV-like), text files, array, and clipboard input  
 ✓ Customizable headers, borders, separators, padding, and alignment  
+✓ Display indexes  
 ✓ Auto-detects delimiters in CSV-style input  
 ✓ Titlecase, Uppercase, and Lowercase formatting options  
 ✓ Adjustable padding and float precision  
@@ -25,6 +26,32 @@ Output:
 | Tony Soprano          | 47  | Boss |
 | Cristopher Moltisanti | 30  | Capo |
 +-----------------------+-----+------+
+```
+Changing the properties
+```
+#include StrTable.ahk
+text := "Name,Age,Rank`nTony Soprano,47,Boss`nCristopher Moltisanti,30,Capo"
+table := StrTable(text)              ; Create a table from the string
+table.show_index := True             ; Add and display the index column
+table.header_format := "Uppercase"   ; Format the header to uppercase
+table.line_format := "lower"         ; Format the cells to lowercase
+table.header_alignment := "center"   ; Align the header to the center
+table.line_alignment := "left"       ; Align the cells to the left
+table.separator := "|"               ; Change the separator
+table.header := ["x", "-", "y", " "] ; Change the header line
+table.bottom := ["o", "."]           ; Change the bottom line
+table.padding := 2                   ; Change the padding
+A_Clipboard := table.convert()       ; Convert the table to a string
+OutputDebug(A_Clipboard)
+```
+Output:
+```
+X=====X=========================X=======X========X
+|  #  |          NAME           |  AGE  |  RANK  |
+y=====y=========================y=======y========y
+|  1  |           tony soprano  |   47  |  boss  |
+|  2  |  cristopher moltisanti  |   30  |  capo  |
+o.....o.........................o.......o........o
 ```
 ## From array
 ```
