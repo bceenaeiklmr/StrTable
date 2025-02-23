@@ -2,8 +2,8 @@
 ; License:   MIT License
 ; Author:    Bence Markiel (bceenaeiklmr)
 ; Github:    https://github.com/bceenaeiklmr/StrTable
-; Date       21.02.2025
-; Version    0.2.0
+; Date       23.02.2025
+; Version    0.3.0
 
 #Requires AutoHotkey v2.0
 #Warn
@@ -25,7 +25,9 @@
  * table.header := ["x", "-", "y", " "] ; Change the header line
  * table.bottom := ["o", "."]           ; Change the bottom line
  * table.padding := 2                   ; Change the padding
- * A_Clipboard := table.convert()       ; Convert the table to a string
+ * table.to_clipboard := 1              ; Assign the output to the clipboard automatically
+ * table.convert()                      ; Convert the table to a string
+ * ;A_Clipboard := table.convert()      ; Convert the table to a string and assign to clipboard
  * OutputDebug(A_Clipboard)
  * @example
  * fileName := A_Desktop "\test.txt"    ; From file
@@ -86,6 +88,20 @@ class StrTable {
                 this.lengths.RemoveAt(1)
                 this.__show_index := False
             }
+        }
+    }
+
+    ; Copy content to clipboard
+    to_clipboard {
+        get => this.__to_clipboard
+        set {
+            if (value < 0 && value > 1) {
+                return
+            }
+            else if (value != this.__to_clipboard) {
+                this.__to_clipboard := value
+            }
+            return
         }
     }
     
@@ -183,12 +199,22 @@ class StrTable {
             
             ; Reformat header
             if (this.has_header && i == 1) {
-                if (this.header_format ~= "^\w+$") {
-                    str := this.cell_format(this.header_format, str)
+                ; Apply cell_format to each header cell individually
+                header_line := ""
+                for k, cell in StrSplit(str, this.separator) {
+                    if (k > 1 && k < StrLen(str)) {
+                        header_line .= this.separator
+                    }
+                    if (k == 1 || k == StrLen(str)) {
+                        header_line .= cell
+                    } else {
+                        header_line .= this.cell_format(this.header_format, cell)
+                    }
                 }
+                str := header_line
                 ; In case the bottom line of the header is different
                 h := this.header
-                if (h.Has(3) && h.Has(4)) {
+                if (h.Has(3) && h.Has(4) && h[3] != "" && h[4] != "") {
                     h := [h[3], h[4]]
                 }
                 else {
@@ -203,8 +229,26 @@ class StrTable {
         }
         
         ; Append the bottom line
-        str .= SubStr(this.add_line(this.bottom[1], this.bottom[2]), 1, -1)
+        if (this.bottom[1] != "" && this.bottom[2] != "") {
+            str .= this.add_line(this.bottom[1], this.bottom[2])
+        }
+        this.str := SubStr(str, 1, -1)
+        if (this.to_clipboard) {
+            A_Clipboard := str
+        }
         return str
+    }
+
+    ; Save the output to a file
+    save(file_path, file_encoding := "UTF-8", overwrite := True) {
+        if (!this.str) {
+            return
+        }
+        if (overwrite && FileExist(file_path)) {
+            FileDelete(file_path)
+        }
+        FileAppend(this.str, file_path, file_encoding)
+        return
     }
 
     ; Remove the borders completely
@@ -287,11 +331,14 @@ class StrTable {
     init_prop_values() {
         this.__float_precision := 6
         this.__show_index := False
+        this.__to_clipboard := False
     }
 
+    ; Constructor
     __New(str, has_header := True, file_encoding := "UTF-8") {
         this.init_prop_values()
         this.has_header := has_header
+        this.str := ""
         if (Type(str) == "String") {
             if (FileExist(str)) {
                 str := FileRead(str, file_encoding)
