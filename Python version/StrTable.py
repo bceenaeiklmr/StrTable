@@ -99,7 +99,7 @@ class StrTable:
     def save(file_path, file_encoding="UTF-8", overwrite=True):
 
         # No content.
-        if not self.str:
+        if not self.txt:
             return
 
         # Delete previous file.
@@ -109,7 +109,7 @@ class StrTable:
         # Write content.
         try:
             with open(file_path, "w", encoding=file_encoding) as f:
-                f.write(self.str)
+                f.write(self.txt)
 
         except PermissionError:
             print("File cannot be accessed for writing.")
