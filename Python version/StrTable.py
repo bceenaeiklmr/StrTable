@@ -17,7 +17,7 @@ def main():
 
     # Test string.
     test = "Name,Age,Rank\nTony Soprano,47,Boss\nCristopher Moltisanti,30,Capo\nDuck Debugger,4.2,Consigliere"
-    test = "test_file.csv"
+    #test = "test_file.csv"
 
     # Initialize the table.
     table = StrTable(test)
@@ -77,11 +77,11 @@ class StrTable:
         if isinstance(strg, str):
 
             # Try to open as file.
-            try:
+            if os.path.exists(strg):
                 with open(strg, "r") as f:
                     self.data = self.data_from_str(f.read())
             # Just use the string.
-            except FileNotFoundError:
+            else:
                 self.data = self.data_from_str(strg)
 
         # Get the column lengths.
@@ -263,15 +263,15 @@ class StrTable:
         return self.txt
 
   
-    # Add a line with the specified characters.
     def add_line(self, char_first="+", char="-"):
         strg = char_first
         for len_col in self.lengths:
-            i = len_col + 2 * self.padding + 1
-            while i:
-                strg += char
-                i -= 1
-        return f"{strg[:-1] + char_first}\n"
+            # Add dashes for the column width plus padding
+            strg += char * (len_col + 2 * self.padding)
+            # Add column separator
+            strg += char_first
+        # Return the line (already ends with a separator)
+        return f"{strg}\n"
 
   
     # Return an array with the columns string lengths.
@@ -387,20 +387,23 @@ class StrTable:
             if self.show_index:
                 return
             offset = 0
-            for i, v in enumerate(self.data):
+            for i, row in enumerate(self.data):
                 if self.has_header and i == 0:
-                    self.data[i].insert(0, "#")
+                    row.insert(0, "#")
                     offset = 1
                     continue
-                self.data[i].insert(0, str(i - offset))
-            self.lengths.insert(0, len(self.data))
+                row.insert(0, str(i - offset))
+            # Recalculate index column width based on inserted strings.
+            index_width = max(len(row[0]) for row in self.data)
+            self.lengths.insert(0, index_width)
             self.__show_index = True
         else:
             if self.show_index == False:
                 return
-            for i, v in enumerate(self.data):
-                self.data[i].pop(0)
-            self.lengths.remove(0)
+            for row in self.data:
+                row.pop(0)
+            # Remove the index width from the lengths.
+            self.lengths.pop(0)
             self.__show_index = False
         return
 
