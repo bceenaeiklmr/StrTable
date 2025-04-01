@@ -96,7 +96,7 @@ class StrTable:
 
   
     # Save the output to a file
-    def save(file_path, file_encoding="UTF-8", overwrite=True):
+    def save(self, file_path, file_encoding="UTF-8", overwrite=True):
 
         # No content.
         if not self.txt:
@@ -118,7 +118,7 @@ class StrTable:
 
   
     # Remove the borders completely
-    def remove_border():
+    def remove_border(self):
         self.header = ["", ""]
         self.bottom = ["", ""]
         self.separator = ""
