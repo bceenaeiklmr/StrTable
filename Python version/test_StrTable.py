@@ -7,7 +7,7 @@
 
 
 # Import 
-from project import get_delimiter, inverse_case, StrTable
+from StrTable import get_delimiter, inverse_case, StrTable
 import pytest
 
 
