@@ -2,8 +2,8 @@
 ; License:   MIT License
 ; Author:    Bence Markiel (bceenaeiklmr)
 ; Github:    https://github.com/bceenaeiklmr/StrTable
-; Date       23.02.2025
-; Version    0.3.0
+; Date       13.10.2026
+; Version    0.4.0
 
 #Requires AutoHotkey v2.0
 #Warn
@@ -95,7 +95,7 @@ class StrTable {
     to_clipboard {
         get => this.__to_clipboard
         set {
-            if (value < 0 && value > 1) {
+            if (value < 0 || value > 1) {
                 return
             }
             else if (value != this.__to_clipboard) {
@@ -285,8 +285,7 @@ class StrTable {
         for row in str {
             try for cell in row {
                 if !(Type(cell) ~= "String|Integer|Float") {
-                    MsgBox("Not supported data type.")
-                    ExitApp()
+                    throw TypeError("Not supported data type: " Type(cell))
                 }
                 single_column := False
             }
@@ -294,19 +293,40 @@ class StrTable {
         if (single_column) {
             arr := []
             for row in str {
+                if !(Type(row) ~= "String|Integer|Float") {
+                    throw TypeError("Not supported data type: " Type(row))
+                }
                 arr.Push([row])
             }
+            return arr
         }
-        return (!single_column) ? str : arr
+        return str
     }
 
     ; Return the length of the columns in an array
     column_lengths() {
 
-        ; Create an array for column lengths
         data := this.data
-        lengths := data[1].Clone()
-        loop lengths.Length {
+        if (data.Length == 0)
+            return []
+
+        ; Determine maximum column count across all rows
+        maxCols := 0
+        for row in data {
+            if (row.Length > maxCols)
+                maxCols := row.Length
+        }
+
+        ; Normalize/pad any shorter rows so all rows have maxCols elements
+        for row in data {
+            while (row.Length < maxCols)
+                row.Push("")
+        }
+
+        ; Initialize lengths array for maxCols columns
+        lengths := []
+        lengths.Length := maxCols
+        loop maxCols {
             lengths[A_Index] := 0
         }
 
@@ -365,6 +385,7 @@ get_delimiter(str) {
 
 ; Convert a string to random case
 random_case(str) {
+    s := ""
     loop parse, str {
         s .= Format('{:' (Random(0, 1) ? 'U':'L') '}', A_LoopField)
     }
@@ -373,9 +394,10 @@ random_case(str) {
 
 ; Convert a string to an inverse case
 inverse_case(str) {
+    s := ""
     loop parse, str {
         f := A_LoopField
-        s .= Format("{:" (f ~= "[A-Z]" ? "L" : "U" ) "}", f)
+        s .= (f == StrUpper(f) ? StrLower(f) : StrUpper(f))
     }
     return s
 }

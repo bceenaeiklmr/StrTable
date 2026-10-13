@@ -3,7 +3,7 @@
 # License:   MIT License
 # Author:    Bence Markiel (bceenaeiklmr)
 # Github:    https://github.com/bceenaeiklmr/StrTable
-# Date       01.04.2025
+# Date       13.10.2026
 
 
 # Import 
@@ -70,3 +70,13 @@ def test_str_case():
     assert inverse_case("cs50p") == "CS50P"
     assert inverse_case("CS50P") == "cs50p"
     assert inverse_case("") == ""
+
+
+def test_uneven_rows():
+    test = "Col1,Col2\nA,B,C,D\n1"
+    table = StrTable(test)
+    assert len(table.lengths) == 4
+    txt = table.convert()
+    assert "D" in txt
+    assert "1" in txt
+

@@ -2,8 +2,8 @@
 ; License:   MIT License
 ; Author:    Bence Markiel (bceenaeiklmr)
 ; Github:    https://github.com/bceenaeiklmr/StrTable
-; Date       20.02.2025
-; Version    0.1.0
+; Date       13.10.2026
+; Version    0.2.0
 
 #include StrTable.ahk
 

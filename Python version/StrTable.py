@@ -3,7 +3,7 @@
 # License:   MIT License
 # Author:    Bence Markiel (bceenaeiklmr)
 # Github:    https://github.com/bceenaeiklmr/StrTable
-# Date       01.04.2025
+# Date       13.10.2026
 
 
 import ctypes
@@ -277,8 +277,19 @@ class StrTable:
     # Return an array with the columns string lengths.
     def column_lengths(self, data):
 
+        if not data:
+            return []
+
+        # Find maximum columns across all rows.
+        max_cols = max(len(line) for line in data)
+
+        # Pad shorter rows to match max_cols.
+        for line in data:
+            while len(line) < max_cols:
+                line.append("")
+
         # Create an array.
-        lengths = [0] * len(data[0])
+        lengths = [0] * max_cols
 
         # Find the longest string in each column.
         for i, line in enumerate(data):
@@ -289,8 +300,8 @@ class StrTable:
                     data[i][j] = str(round(float(data[i][j]), self.float_precision))
 
                 # Update length.
-                if len(data[i][j]) > lengths[j]:
-                    lengths[j] = len(data[i][j])
+                if len(str(data[i][j])) > lengths[j]:
+                    lengths[j] = len(str(data[i][j]))
 
         return lengths
 
